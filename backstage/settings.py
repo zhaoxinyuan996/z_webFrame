@@ -1,0 +1,3 @@
+staticPath = 'dist'
+
+debuggerLevel = 'DEBUG'
