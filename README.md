@@ -1,9 +1,10 @@
 # z_webFrame
 
-这是一个基于python socket编程的sync/async双引擎web框架，为了方便上手，文件目录与django大致相似，url分配路由，views写视图函数
+这是一个基于python socket编程的sync/async双引擎web框架
+为了方便上手，文件目录与django大致相似，url分配路由，views为视图函数
 
 
-核心流程为：
+核心处理流程为：
 
 
 创建监听套接字
