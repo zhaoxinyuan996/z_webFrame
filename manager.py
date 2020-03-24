@@ -1,6 +1,9 @@
-import sys, os
+import sys, os, signal
+from time import sleep
 from multiprocessing import Process
+
 class EngineError(Exception):pass
+
 def main():
     sys.argv.remove(os.path.basename(globals()['__file__']))
 
@@ -32,9 +35,17 @@ def main():
         raise EngineError('请选择正确的引擎')
 
 
+
+def monitor(pid):
+
+    signal.signal(signal.SIGINT, lambda n1, n2 :os.kill(pid, 1) and os._exit(1))
+    while True:
+        sleep(99999)
+
 if __name__ == '__main__':
-    p = Process(target=main)
-    p.start()
 
+    pFrame = Process(target=main)
+    pFrame.start()
 
-# 还需要重定向，解决图片返回格式非image/jpeg，导致response加载失败
+    pMonitor = Process(target=monitor, args=(pFrame.pid, ))
+    pMonitor.start()

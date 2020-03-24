@@ -19,9 +19,18 @@ Content-Encoding: UTF-8
 %s
 '''
 
+editMessage = b'''HTTP/1.1 %s %s
+Date: Mon, 23 May 2005 22:38:34 GMT
+Content-Type: */*; charset=UTF-8
+Content-Encoding: UTF-8
+
+%s
+'''
+
 class httpRequest():
-    def __init__(self, data):
+    def __init__(self, data, **kwargs):
         self.data = data
+        self.__dict__.update(kwargs.items())
         # print(data)
         try:
             self.parse_http_request()
@@ -50,7 +59,10 @@ class httpRequest():
         del self.data, self.part1, self.part2
 
 def httpResponse_404():
-    return b'404 not found'
+    return 404, editMessage % (b'404', b'URL NOT FOUNT', b'404 not found')
+
+def httpResponse_500():
+    return 500, editMessage % (b'500', b'SERVER ERROR', b'500 server err')
 
 # 页面
 def httpRender(fileName):
@@ -58,12 +70,12 @@ def httpRender(fileName):
     with open(htmlPath, 'rb') as f:
         html = f.read()
 
-    return (htmlMessage % html).replace(b'\n', b'\r\n')
+    return 200, htmlMessage % html
 
 # 接口
 def httpResponse(data):
 
-    return (apiMessage % data).replace(b'\n', b'\r\n')
+    return 200, apiMessage % data
 
 # 静态文件
 def get_static_file(fileName):
@@ -72,7 +84,7 @@ def get_static_file(fileName):
     with open(htmlPath, 'rb') as f:
         html = f.read()
 
-    return (apiMessage % html).replace(b'\n', b'\r\n')
+    return 200, apiMessage % html
 
 
 if __name__ == '__main__':

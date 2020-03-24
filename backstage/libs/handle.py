@@ -1,5 +1,4 @@
-from re import search, findall
-from functools import partial
+import time
 
 from backstage import urls
 from backstage.libs.static import *
@@ -25,23 +24,36 @@ class Attribute():
 
 # 分发路由
 def handle_url(s, request):
+    reponseStatus = None
     checkValue = Attribute()
     checkValue.check = request.get('httpUrl')
 
     funcRes = 'SyntaxError: url读取失败'.encode()
     # 未识别 返回未识别
     if not checkValue.check:
-        funcRes = httpResponse_404()
-        s.send(funcRes)
+        # funcRes = httpResponse_404()
+        # s.send(funcRes)
+        return
 
     if request.get('httpUrl'):
 
             # 走路由
         if checkValue.check == 'url':
             if urls.urlDict.get(request['httpUrl']):
-                funcRes = urls.urlDict[request['httpUrl']](request)
+                try:
+                    reponseStatus, funcRes = urls.urlDict[request['httpUrl']](request)
+                except:
+                    reponseStatus, funcRes = httpResponse_500()
+            else:
+                reponseStatus, funcRes = httpResponse_404()
         # 读静态文件
         elif checkValue.check == 'static':
-            funcRes = get_static_file(request['httpUrl'])
+            reponseStatus, funcRes = get_static_file(request['httpUrl'])
 
+    outputUserInfo(request, reponseStatus)
     s.send(funcRes)
+
+
+
+def outputUserInfo(request, reponseStatus):
+    print('%s - %s - %s - %s' % (time.strftime('%Y-%m-%d %H:%M:%S'), request.addr, reponseStatus, request.httpUrl))
