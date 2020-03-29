@@ -49,27 +49,28 @@ def page(request):#带page参数的分页，默认page=1
     if request.method=='POST':
         res=json.loads(request.body.decode())
         page=res['page']
-        cursor=connection.cursor()
-        num=(int(page)-1)*20
-        sql='select iid,date,name,firsturl from album where hide="Flase" order by date desc,iid limit 20'
-        if int(page)>1:
-            sql='select iid,date,name,firsturl from album  where hide="Flase"order by date desc,iid limit %s,20'%(num)
-        cursor.execute(sql)
-        res=list(cursor.fetchall())
-        res_final=[]
-        for i in res:
-            i=list(i)
-            i.append((str(i[0])+'x'))
-            res_final.append(i)
+        with connection as cursor:
+            # cursor=connection.cursor()
+            num=(int(page)-1)*20
+            sql='select iid,date,name,firsturl from album where hide="Flase" order by date desc,iid limit 20'
+            if int(page)>1:
+                sql='select iid,date,name,firsturl from album  where hide="Flase"order by date desc,iid limit %s,20'%(num)
+            cursor.execute(sql)
+            res=list(cursor.fetchall())
+            res_final=[]
+            for i in res:
+                i=list(i)
+                i.append((str(i[0])+'x'))
+                res_final.append(i)
 
-        sqlnum = 'select count(name) from album where hide="Flase"'
-        cursor.execute(sqlnum)
-        resnum = cursor.fetchall()
-        page_num=resnum
-        dic={
-            'url':res_final,
-            'pagenum':page_num
-        }
+            sqlnum = 'select count(name) from album where hide="Flase"'
+            cursor.execute(sqlnum)
+            resnum = cursor.fetchall()
+            page_num=resnum
+            dic={
+                'url':res_final,
+                'pagenum':page_num
+            }
         return httpResponse(json.dumps(dic))
     else:
         return httpResponse('0')
