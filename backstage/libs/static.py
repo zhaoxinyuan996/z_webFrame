@@ -20,6 +20,14 @@ Content-Encoding: UTF-8
 %s
 '''
 
+cssMessage = b'''HTTP/1.1 200 OK
+Date: Mon, 23 May 2005 22:38:34 GMT
+Content-Type: text/css; charset=UTF-8
+Content-Encoding: UTF-8
+
+%s
+'''
+
 editMessage = b'''HTTP/1.1 %s %s
 Date: Mon, 23 May 2005 22:38:34 GMT
 Content-Type: */*; charset=UTF-8
@@ -88,7 +96,8 @@ def get_static_file(fileName):
     htmlPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame', staticPath) + os.path.normcase(fileName)
     with open(htmlPath, 'rb') as f:
         html = f.read()
-
+    if fileName.endswith('css'):
+        return 200, cssMessage % html
     return 200, apiMessage % html
 
 
