@@ -55,7 +55,6 @@ def page(request):#带page参数的分页，默认page=1
                 sql='select iid,date,name,firsturl from album  where hide="False"order by date desc,iid limit %s,20'%(num)
             cursor.execute(sql)
             res=list(cursor.fetchall())
-            print(res) ##############
             res_final=[]
             for i in res:
                 i=list(i)
@@ -214,7 +213,6 @@ def view(request):
     if request.httpMethod=='POST':
         res=json.loads(request.body.decode())
         iid=res['iid']
-        print(iid)
         cursor = connection.cursor()
         sql_last='select date,name,url from album,url where album.iid=%s and album.iid=url.iid where album.iid<%s order by iid desc limit 1'%iid
         sql_next='select date,name,url from album,url where album.iid=%s and album.iid=url.iid where album.iid>%s order by iid limit 1' % iid
