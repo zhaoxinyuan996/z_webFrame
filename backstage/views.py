@@ -46,7 +46,8 @@ def limit(request):#分页 默认第一页 截取前40
     return httpResponse(json.dumps(dic))
 def page(request):#带page参数的分页，默认page=1
     get_ip(request,'page')
-    print(request.__dict__)
+    for i in request.__dict__:
+        print(i, request.__dict__[i])
     print('method', request.httpMethod)
     if request.httpMethod=='POST':
         # res=json.loads(request.body.decode())
