@@ -1,5 +1,5 @@
 from backstage.libs.static import *
-from backstage.libs.db import connection
+from backstage.libs.db import Connection
 import json
 import math
 import redis
@@ -34,7 +34,7 @@ def home(request):
 #     return httpRender(request,'index.html')
 def limit(request):#分页 默认第一页 截取前40
     get_ip(request,'limit')
-    with connection as cursor:
+    with Connection() as cursor:
         # cursor=connection.cursor()
         sql='select iid,date,name,firsturl from album limit 40'
         cursor.execute(sql)
@@ -159,7 +159,7 @@ def look(request):#点赞功能，与排行相关，接收参数是iid
         return httpResponse(json.dumps({'key':'1'}))
 def top(request):#排行功能
     get_ip(request,'top')
-    with connection as cursor:
+    with Connection() as cursor:
         # cursor=connection.cursor()
         sql='select iid,date,name from album order by look desc limit 7'
         cursor.execute(sql)
