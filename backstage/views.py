@@ -1,10 +1,9 @@
 from backstage.libs.static import *
-
+from backstage.libs.db import connection
 import json
 import math
 import redis
 import datetime
-from django.db import connection
 from time import strftime
 
 
