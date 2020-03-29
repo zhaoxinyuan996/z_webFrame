@@ -74,25 +74,23 @@ def page(request):#带page参数的分页，默认page=1
         return httpResponse('0')
 def pagenum(request):#返回总页数
     get_ip(request,'pagenum')
-    cursor=connection.cursor()
-    sql = 'select count(name) from album'
-    cursor.execute(sql)
-    res = cursor.fetchall()
-    page_num=math.ceil(res[0][0]/20)
+    with Connection() as cursor:
+        sql = 'select count(name) from album'
+        cursor.execute(sql)
+        res = cursor.fetchall()
+        page_num=math.ceil(res[0][0]/20)
     return httpResponse(json.dumps({'pagenum':page_num}))
 def signup(request):#注册功能 成功返回1 失败返回0
     get_ip(request,'signup')
     if request.httpMethod=='POST':
         try:
-            print(request.body)
-            res=json.loads(request.body.decode())
-            username,password,tel=res['username'],res['password'],res['tel']
-            cursor=connection.cursor()
-            sql='insert into users (username,password,tel) values("%s","%s","%s")'%(username,password,tel)
-            cursor.execute(sql)
-            sql1='select uid from users where username="%s"'%username
-            cursor.execute(sql1)
-            res=cursor.fetchall()[0][0]
+            username,password,tel=request['username'],request['password'],request['tel']
+            with Connection() as cursor:
+                sql='insert into users (username,password,tel) values("%s","%s","%s")'%(username,password,tel)
+                cursor.execute(sql)
+                sql1='select uid from users where username="%s"'%username
+                cursor.execute(sql1)
+                res=cursor.fetchall()[0][0]
             return httpResponse(json.dumps({'success':1,'uid':res}))
         except Exception as err:
             info=str(err).split("'")[-2]
@@ -104,12 +102,11 @@ def signup(request):#注册功能 成功返回1 失败返回0
 def signin(request):
     get_ip(request,'signin')
     if request.httpMethod=='POST':
-            res=json.loads(request.body.decode())
-            username,password=res['username'],res['password']
-            cursor=connection.cursor()
-            sql='select uid from users where username="%s" and password="%s"'%(username,password)
-            cursor.execute(sql)
-            uid=cursor.fetchall()
+            username,password=request['username'],request['password']
+            with Connection() as cursor:
+                sql='select uid from users where username="%s" and password="%s"'%(username,password)
+                cursor.execute(sql)
+                uid=cursor.fetchall()
             if uid:
                 return httpResponse(json.dumps({'success':'1','uid':uid[0][0]}))
             else:
@@ -120,40 +117,37 @@ def signin(request):
 def select_userinfo(request):
     if request.httpMethod=='POST':
         try:
-            res = json.loads(request.body.decode())
-            uid=res['uid']
-            cursor = connection.cursor()
-            sql='select tel,sex,birthday,province,city from users where uid="%s"'%uid
-            cursor.execute(sql)
-            res=cursor.fetchall()
+            uid=request['uid']
+            with Connection() as cursor:
+                sql='select tel,sex,birthday,province,city from users where uid="%s"'%uid
+                cursor.execute(sql)
+                res=cursor.fetchall()
             return httpResponse(json.dumps({'success': '1','userinfo':res}).encode())
         except Exception as err:
             return httpResponse(json.dumps({'success': '0', 'errorinfo':str(err)}).encode())
 def update_userinfo(request):
     if request.httpMethod=='POST':
         try:
-            cursor = connection.cursor()
-            res = json.loads(request.body.decode())
-            uid=res['uid']
-            # password=res['password']
-            tel=res['tel']
-            sex=res['sex']
-            birthday=res['birthday']
-            province=res['province']
-            city=res['city']
-            sql='update users set tel="%s",sex="%s",birthday="%s",province="%s",city="%s" where uid="%s"'%(tel,sex,birthday,province,city,uid)
-            cursor.execute(sql)
+            with Connection() as cursor:
+                uid=request['uid']
+                # password=res['password']
+                tel=request['tel']
+                sex=request['sex']
+                birthday=request['birthday']
+                province=request['province']
+                city=request['city']
+                sql='update users set tel="%s",sex="%s",birthday="%s",province="%s",city="%s" where uid="%s"'%(tel,sex,birthday,province,city,uid)
+                cursor.execute(sql)
             return httpResponse(json.dumps({'success':'1'}).encode())
         except Exception as err:
             return httpResponse(json.dumps({'success':'0','errorinfo':str(err)}).encode())
 def look(request):#点赞功能，与排行相关，接收参数是iid
     get_ip(request,'look')
     if request.httpMethod=='POST':
-        res=json.loads(request.body.decode())
-        iid=res['iid']
-        cursor=connection.cursor()
-        sql='update album set look=look+1 where iid=%d'%iid
-        cursor.execute(sql)
+        iid=request['iid']
+        with Connection() as cursor:
+            sql='update album set look=look+1 where iid=%d'%iid
+            cursor.execute(sql)
         return httpResponse(json.dumps({'key':'1'}))
 def top(request):#排行功能
     get_ip(request,'top')
@@ -166,81 +160,78 @@ def top(request):#排行功能
 def imgList(request):
     get_ip(request,'imgList')
     if request.httpMethod=='POST':
-        res=json.loads(request.body.decode())
-        iid=res['iid']
-        cursor=connection.cursor()
-        sql='select date,name,url from album,url where album.iid=%s and album.iid=url.iid'%iid
-        cursor.execute(sql)
-        res=cursor.fetchall()
-        sql_last = 'select date,name,iid from album where iid<%s order by iid desc limit 1' % iid
-        sql_next = 'select date,name,iid from album where iid>%s order by iid  limit 1' % iid
-        cursor.execute(sql_last)
-        img_last = cursor.fetchall()
-        if img_last:
-            img_last = img_last[0]
-        else:
-            img_last = '没有了'
-        cursor.execute(sql_next)
-        img_next = cursor.fetchall()
-        if img_next:
-            img_next = img_next[0]
-        else:
-            img_next = '没有了'
+        iid=request['iid']
+        with Connection() as cursor:
+            sql='select date,name,url from album,url where album.iid=%s and album.iid=url.iid'%iid
+            cursor.execute(sql)
+            res=cursor.fetchall()
+            sql_last = 'select date,name,iid from album where iid<%s order by iid desc limit 1' % iid
+            sql_next = 'select date,name,iid from album where iid>%s order by iid  limit 1' % iid
+            cursor.execute(sql_last)
+            img_last = cursor.fetchall()
+            if img_last:
+                img_last = img_last[0]
+            else:
+                img_last = '没有了'
+            cursor.execute(sql_next)
+            img_next = cursor.fetchall()
+            if img_next:
+                img_next = img_next[0]
+            else:
+                img_next = '没有了'
         return httpResponse(json.dumps({'img':res,'img_last':img_last,'img_next':img_next}))
 def around(request):
     get_ip(request,'around')
     if request.httpMethod=='POST':
-        res=json.loads(request.body.decode())
-        iid=res['iid']
-        cursor = connection.cursor()
-        sql_last = 'select date,name,iid from album where iid<%s order by iid desc limit 1' % iid
-        sql_next = 'select date,name,iid from album where iid>%s order by iid  limit 1' % iid
-        cursor.execute(sql_last)
-        img_last=cursor.fetchall()
-        if img_last:
-            img_last=img_last[0]
-        else:
-            img_last='没有了'
-        cursor.execute(sql_next)
-        img_next=cursor.fetchall()
-        if img_next:
-            img_next=img_next[0]
-        else:
-            img_next='没有了'
+        iid=request['iid']
+        with Connection() as cursor:
+            sql_last = 'select date,name,iid from album where iid<%s order by iid desc limit 1' % iid
+            sql_next = 'select date,name,iid from album where iid>%s order by iid  limit 1' % iid
+            cursor.execute(sql_last)
+            img_last=cursor.fetchall()
+            if img_last:
+                img_last=img_last[0]
+            else:
+                img_last='没有了'
+            cursor.execute(sql_next)
+            img_next=cursor.fetchall()
+            if img_next:
+                img_next=img_next[0]
+            else:
+                img_next='没有了'
         return httpResponse(json.dumps({'img_last':img_last,'img_next':img_next}))
 def view(request):
     get_ip(request,'view')
     if request.httpMethod=='POST':
-        res=json.loads(request.body.decode())
-        iid=res['iid']
-        cursor = connection.cursor()
-        sql_last='select date,name,url from album,url where album.iid=%s and album.iid=url.iid where album.iid<%s order by iid desc limit 1'%iid
-        sql_next='select date,name,url from album,url where album.iid=%s and album.iid=url.iid where album.iid>%s order by iid limit 1' % iid
-        cursor.execute(sql_last)
-        img_last = cursor.fetchall()
-        cursor.execute(sql_next)
-        img_next=cursor.fetchall()
+        iid=request['iid']
+        with Connection() as cursor:
+            sql_last='select date,name,url from album,url where album.iid=%s and album.iid=url.iid where album.iid<%s order by iid desc limit 1'%iid
+            sql_next='select date,name,url from album,url where album.iid=%s and album.iid=url.iid where album.iid>%s order by iid limit 1' % iid
+            cursor.execute(sql_last)
+            img_last = cursor.fetchall()
+            cursor.execute(sql_next)
+            img_next=cursor.fetchall()
         return httpResponse(json.dumps({'img_last':img_last,'img_next':img_next}))
 def province_city_count(request):
-    cursor = connection.cursor()
-    if request.httpMethod=='GET':
-        sql='select distinct province from province_city'
-        cursor.execute(sql)
-        res=cursor.fetchall()
-        return httpResponse(json.dumps({'province':res}))
-    elif request.httpMethod=='POST':
-        if 'province' in json.loads(request.body.decode()):
-            province=json.loads(request.body.decode())['province']
-            sql = 'select distinct city from province_city where province="%s"' % province
+    with Connection() as cursor:
+        if request.httpMethod=='GET':
+            sql='select distinct province from province_city'
             cursor.execute(sql)
-            res = cursor.fetchall()
-            return httpResponse(json.dumps({'city': res}))
-        elif 'city' in json.loads(request.body.decode()):
-            city=json.loads(request.body.decode())['city']
-            sql = 'select county from province_city where city="%s"' % city
-            cursor.execute(sql)
-            res = cursor.fetchall()
-            return httpResponse(json.dumps({'county': res}))
+            res=cursor.fetchall()
+            return httpResponse(json.dumps({'province':res}))
+        elif request.httpMethod=='POST':
+            if 'province' in str(request):
+                province=request['province']
+                sql = 'select distinct city from province_city where province="%s"' % province
+                cursor.execute(sql)
+                res = cursor.fetchall()
+                return httpResponse(json.dumps({'city': res}))
+            elif 'city' in str(request):
+                city=request['city']
+                sql = 'select county from province_city where city="%s"' % city
+                cursor.execute(sql)
+                res = cursor.fetchall()
+                return httpResponse(json.dumps({'county': res}))
 def count_visit(request):
     pool=redis.ConnectionPool(host='127.0.0.1', port=6379)
     conn=redis.Redis(connection_pool=pool)
