@@ -46,7 +46,7 @@ def limit(request):#分页 默认第一页 截取前40
     return httpResponse(json.dumps(dic))
 def page(request):#带page参数的分页，默认page=1
     get_ip(request,'page')
-    if request.method=='POST':
+    if request.httpMethod=='POST':
         res=json.loads(request.body.decode())
         page=res['page']
         with connection as cursor:
@@ -84,7 +84,7 @@ def pagenum(request):#返回总页数
     return httpResponse(json.dumps({'pagenum':page_num}))
 def signup(request):#注册功能 成功返回1 失败返回0
     get_ip(request,'signup')
-    if request.method=='POST':
+    if request.httpMethod=='POST':
         try:
             print(request.body)
             res=json.loads(request.body.decode())
@@ -105,7 +105,7 @@ def signup(request):#注册功能 成功返回1 失败返回0
         return httpResponse('0')
 def signin(request):
     get_ip(request,'signin')
-    if request.method=='POST':
+    if request.httpMethod=='POST':
             res=json.loads(request.body.decode())
             username,password=res['username'],res['password']
             cursor=connection.cursor()
@@ -120,7 +120,7 @@ def signin(request):
         return httpResponse('0')
 
 def select_userinfo(request):
-    if request.method=='POST':
+    if request.httpMethod=='POST':
         try:
             res = json.loads(request.body.decode())
             uid=res['uid']
@@ -132,7 +132,7 @@ def select_userinfo(request):
         except Exception as err:
             return httpResponse(json.dumps({'success': '0', 'errorinfo':str(err)}).encode())
 def update_userinfo(request):
-    if request.method=='POST':
+    if request.httpMethod=='POST':
         try:
             cursor = connection.cursor()
             res = json.loads(request.body.decode())
@@ -150,7 +150,7 @@ def update_userinfo(request):
             return httpResponse(json.dumps({'success':'0','errorinfo':str(err)}).encode())
 def look(request):#点赞功能，与排行相关，接收参数是iid
     get_ip(request,'look')
-    if request.method=='POST':
+    if request.httpMethod=='POST':
         res=json.loads(request.body.decode())
         iid=res['iid']
         cursor=connection.cursor()
@@ -167,7 +167,7 @@ def top(request):#排行功能
     return httpResponse(json.dumps({'img':res}))
 def imgList(request):
     get_ip(request,'imgList')
-    if request.method=='POST':
+    if request.httpMethod=='POST':
         res=json.loads(request.body.decode())
         iid=res['iid']
         cursor=connection.cursor()
@@ -191,7 +191,7 @@ def imgList(request):
         return httpResponse(json.dumps({'img':res,'img_last':img_last,'img_next':img_next}))
 def around(request):
     get_ip(request,'around')
-    if request.method=='POST':
+    if request.httpMethod=='POST':
         res=json.loads(request.body.decode())
         iid=res['iid']
         cursor = connection.cursor()
@@ -212,7 +212,7 @@ def around(request):
         return httpResponse(json.dumps({'img_last':img_last,'img_next':img_next}))
 def view(request):
     get_ip(request,'view')
-    if request.method=='POST':
+    if request.httpMethod=='POST':
         res=json.loads(request.body.decode())
         iid=res['iid']
         print(iid)
@@ -226,12 +226,12 @@ def view(request):
         return httpResponse(json.dumps({'img_last':img_last,'img_next':img_next}))
 def province_city_count(request):
     cursor = connection.cursor()
-    if request.method=='GET':
+    if request.httpMethod=='GET':
         sql='select distinct province from province_city'
         cursor.execute(sql)
         res=cursor.fetchall()
         return httpResponse(json.dumps({'province':res}))
-    elif request.method=='POST':
+    elif request.httpMethod=='POST':
         if 'province' in json.loads(request.body.decode()):
             province=json.loads(request.body.decode())['province']
             sql = 'select distinct city from province_city where province="%s"' % province
