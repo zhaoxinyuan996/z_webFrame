@@ -1,3 +1,4 @@
+import traceback
 from socket import socket, SOL_SOCKET, SO_REUSEADDR, gethostbyname, gethostname
 
 from backstage.libs.handle import handle_url, outputUserInfo
@@ -20,7 +21,8 @@ def engine(port = 8000):
         # 分发路由
         try:
             handle_url(c, request)
-        except:
+        except Exception as err:
+            print('SYNE ERRPR %s' % traceback.print_exc())
             reponseStatus, funcRes = httpResponse_500()
             outputUserInfo(request, reponseStatus)
             try:

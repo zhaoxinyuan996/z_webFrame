@@ -1,4 +1,5 @@
 import time
+import traceback
 
 from backstage import urls
 from backstage.libs.static import *
@@ -42,7 +43,8 @@ def handle_url(s, request):
             if urls.urlDict.get(request['httpUrl']):
                 try:
                     reponseStatus, funcRes = urls.urlDict[request['httpUrl']](request)
-                except:
+                except Exception as err:
+                    print('HANDLE ERRPR %s' % traceback.print_exc())
                     reponseStatus, funcRes = httpResponse_500()
             else:
                 reponseStatus, funcRes = httpResponse_404()
