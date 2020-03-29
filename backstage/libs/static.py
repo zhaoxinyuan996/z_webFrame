@@ -30,6 +30,7 @@ Content-Encoding: UTF-8
 class httpRequest():
     def __init__(self, data, **kwargs):
         self.data = data
+        print(data)
         self.__dict__.update(kwargs.items())
         # print(data)
         try:

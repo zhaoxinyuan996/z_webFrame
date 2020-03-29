@@ -32,8 +32,6 @@ def handle_url(s, request):
     funcRes = 'SyntaxError: url读取失败'.encode()
     # 未识别 返回未识别
     if not checkValue.check:
-        # funcRes = httpResponse_404()
-        # s.send(funcRes)
         return
 
     if request.get('httpUrl'):
