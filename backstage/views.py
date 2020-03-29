@@ -34,14 +34,15 @@ def home(request):
 #     return httpRender(request,'index.html')
 def limit(request):#分页 默认第一页 截取前40
     get_ip(request,'limit')
-    cursor=connection.cursor()
-    sql='select iid,date,name,firsturl from album limit 40'
-    cursor.execute(sql)
-    res=cursor.fetchall()
-    dic={
-        'img':res,
-        'top':[],
-    }
+    with connection as cursor:
+        # cursor=connection.cursor()
+        sql='select iid,date,name,firsturl from album limit 40'
+        cursor.execute(sql)
+        res=cursor.fetchall()
+        dic={
+            'img':res,
+            'top':[],
+        }
     return httpResponse(json.dumps(dic))
 def page(request):#带page参数的分页，默认page=1
     get_ip(request,'page')
@@ -157,10 +158,11 @@ def look(request):#点赞功能，与排行相关，接收参数是iid
         return httpResponse(json.dumps({'key':'1'}))
 def top(request):#排行功能
     get_ip(request,'top')
-    cursor=connection.cursor()
-    sql='select iid,date,name from album order by look desc limit 7'
-    cursor.execute(sql)
-    res=cursor.fetchall()
+    with connection as cursor:
+        # cursor=connection.cursor()
+        sql='select iid,date,name from album order by look desc limit 7'
+        cursor.execute(sql)
+        res=cursor.fetchall()
     return httpResponse(json.dumps({'img':res}))
 def imgList(request):
     get_ip(request,'imgList')
