@@ -1,4 +1,5 @@
 import os
+import json
 from backstage import settings
 
 staticPath = settings.staticPath
@@ -30,7 +31,6 @@ Content-Encoding: UTF-8
 class httpRequest():
     def __init__(self, data, **kwargs):
         self.data = data
-        print(data)
         self.__dict__.update(kwargs.items())
         # print(data)
         try:
@@ -54,8 +54,11 @@ class httpRequest():
         self.part1, self.part2 = self.data.decode().split('\r\n', 1)
         self.httpMethod, self.httpUrl, self.httpVersion = self.part1.split()
         for i in self.part2.split('\r\n'):
-            if ':' in i:
-                self.__dict__[i.split(':')[0]] = i.split(':')[1]
+            try:
+                self.__dict__.update(json.loads(i))
+            except:
+                if ':' in i:
+                    self.__dict__[i.split(':')[0]] = i.split(':')[1]
 
         del self.data, self.part1, self.part2
 
