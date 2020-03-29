@@ -46,28 +46,23 @@ def limit(request):#分页 默认第一页 截取前40
     return httpResponse(json.dumps(dic))
 def page(request):#带page参数的分页，默认page=1
     get_ip(request,'page')
-    for i in request.__dict__:
-        print(i, request.__dict__[i])
-    print('method', request.httpMethod)
     if request.httpMethod=='POST':
-        # res=json.loads(request.body.decode())
-
         page=request['page']
         with Connection() as cursor:
-            # cursor=connection.cursor()
-            num=(int(page)-1)*20
-            sql='select iid,date,name,firsturl from album where hide="Flase" order by date desc,iid limit 20'
+            num=(int(page) - 1) * 20
+            sql='select iid,date,name,firsturl from album where hide="False" order by date desc,iid limit 20'
             if int(page)>1:
-                sql='select iid,date,name,firsturl from album  where hide="Flase"order by date desc,iid limit %s,20'%(num)
+                sql='select iid,date,name,firsturl from album  where hide="False"order by date desc,iid limit %s,20'%(num)
             cursor.execute(sql)
             res=list(cursor.fetchall())
+            print(res) ##############
             res_final=[]
             for i in res:
                 i=list(i)
                 i.append((str(i[0])+'x'))
                 res_final.append(i)
 
-            sqlnum = 'select count(name) from album where hide="Flase"'
+            sqlnum = 'select count(name) from album where hide="False"'
             cursor.execute(sqlnum)
             resnum = cursor.fetchall()
             page_num=resnum
