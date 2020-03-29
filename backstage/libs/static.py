@@ -75,7 +75,7 @@ def httpRender(fileName):
 # 接口
 def httpResponse(data):
     if not isinstance(data, bytes):
-        data = bytes(data)
+        data = data.encode()
     return 200, apiMessage % data
 
 # 静态文件
