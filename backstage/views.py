@@ -47,9 +47,10 @@ def limit(request):#分页 默认第一页 截取前40
 def page(request):#带page参数的分页，默认page=1
     get_ip(request,'page')
     if request.httpMethod=='POST':
-        res=json.loads(request.body.decode())
-        page=res['page']
-        with connection as cursor:
+        # res=json.loads(request.body.decode())
+        print(request.__dict__)
+        page=request['page']
+        with Connection() as cursor:
             # cursor=connection.cursor()
             num=(int(page)-1)*20
             sql='select iid,date,name,firsturl from album where hide="Flase" order by date desc,iid limit 20'
