@@ -1,16 +1,17 @@
 import traceback
+from threading import Thread
 from socket import socket, SOL_SOCKET, SO_REUSEADDR, gethostbyname, gethostname
 
 from backstage.libs.static import *
-from backstage.settings import socketBlock
 from backstage.libs.handle import handle_url, outputUserInfo
 
+def send_thread(s, data):
+    s.send(data)
+    s.close()
 
 def engine(port = 8000):
 
     s=socket()
-
-    s.setblocking(socketBlock)
 
     s.setsockopt(SOL_SOCKET,SO_REUSEADDR,1)
     serverIp = gethostbyname(gethostname())
@@ -18,20 +19,10 @@ def engine(port = 8000):
     s.bind(('0.0.0.0', port))
     s.listen()
     while True:
-        while True:
-            try:
-                c, addr = s.accept()
-                break
-            except BlockingIOError:
-                pass
-        while True:
-            try:
-                request = httpRequest(c.recv(1024), addr=addr[0])
-                break
-            except BlockingIOError:
-                pass
-        # 分发路由
+        c, addr = s.accept()
+        request = httpRequest(c.recv(1024), addr = addr[0])
 
+        # 分发路由
         try:
             handle_url(c, request)
         except Exception as err:
@@ -39,11 +30,13 @@ def engine(port = 8000):
             reponseStatus, funcRes = httpResponse_500()
             outputUserInfo(request, reponseStatus)
             try:
-                c.send(funcRes)
+                # c.send(funcRes)
+                t = Thread(target=send_thread, args=(c, funcRes))
+                t.start()
             except Exception as err:
                 print(err)
 
-        c.close()
+        # c.close()
 
 
 if __name__ == '__main__':
