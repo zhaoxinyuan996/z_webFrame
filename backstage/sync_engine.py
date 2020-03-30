@@ -1,6 +1,6 @@
-from gevent import monkey
-monkey.patch_socket()
-import gevent
+# from gevent import monkey
+# monkey.patch_socket()
+# import gevent
 import traceback
 from threading import Thread
 from socket import socket, SOL_SOCKET, SO_REUSEADDR, gethostbyname, gethostname
@@ -28,8 +28,8 @@ def engine(port = 8000):
         # 分发路由
         try:
             # handle_url(c, request) # 纯同步
-            # Thread(target=handle_url, args=(c, request)).start() # 线程异步
-            gevent.spawn(handle_url, c, request).start()
+            Thread(target=handle_url, args=(c, request)).start() # 线程异步
+            # gevent.spawn(handle_url, c, request).start()
         except Exception as err:
             print('SYNE ERRPR %s' % traceback.print_exc())
             reponseStatus, funcRes = httpResponse_500()
