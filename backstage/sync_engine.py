@@ -1,4 +1,5 @@
 import traceback
+import gevent
 from threading import Thread
 from socket import socket, SOL_SOCKET, SO_REUSEADDR, gethostbyname, gethostname
 
@@ -24,19 +25,17 @@ def engine(port = 8000):
 
         # 分发路由
         try:
-            handle_url(c, request)
+            # handle_url(c, request)
+            Thread(target=handle_url, args=(c, request)).start()
         except Exception as err:
             print('SYNE ERRPR %s' % traceback.print_exc())
             reponseStatus, funcRes = httpResponse_500()
             outputUserInfo(request, reponseStatus)
             try:
-                # c.send(funcRes)
-                t = Thread(target=send_thread, args=(c, funcRes))
-                t.start()
+                s.send(funcRes)
+                s.close()
             except Exception as err:
                 print(err)
-
-        # c.close()
 
 
 if __name__ == '__main__':
