@@ -1,4 +1,5 @@
-from gevent import monkey; monkey.patch_socket()
+from gevent import monkey
+monkey.patch_socket()
 import gevent
 import traceback
 from threading import Thread
