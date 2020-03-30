@@ -1,6 +1,13 @@
 import os
 import json
 from backstage import settings
+from backstage.libs.static_file import GetStaticFile
+
+g = None
+
+if settings.preloadingStatic:
+    g = GetStaticFile()
+
 
 staticPath = settings.staticPath
 
@@ -78,9 +85,13 @@ def httpResponse_500():
 
 # 页面
 def httpRender(fileName):
+
     htmlPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame', staticPath, fileName)
-    with open(htmlPath, 'rb') as f:
-        html = f.read()
+    if g:
+        html = g.fileDict[htmlPath]
+    else:
+        with open(htmlPath, 'rb') as f:
+            html = f.read()
 
     return 200, htmlMessage % html
 
@@ -94,8 +105,11 @@ def httpResponse(data):
 def get_static_file(fileName):
 
     htmlPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame', staticPath) + os.path.normcase(fileName)
-    with open(htmlPath, 'rb') as f:
-        html = f.read()
+    if g:
+        html = g.fileDict[htmlPath]
+    else:
+        with open(htmlPath, 'rb') as f:
+            html = f.read()
     if fileName.endswith('css'):
         return 200, cssMessage % html
     return 200, apiMessage % html

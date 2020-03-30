@@ -8,7 +8,7 @@ from backstage.libs.static import *
 class CheckData():
     def __get__(self, instance, owner):
         return self.value
-        # elif '':
+
     def __set__(self, instance, value):
         if not value:
             self.value = None
@@ -17,6 +17,7 @@ class CheckData():
         else:
             self.value = 'url'
         pass
+
     def __delete__(self, instance):
         pass
 
