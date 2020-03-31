@@ -47,6 +47,27 @@ class httpRequest():
 
         del self.data, self.part1, self.part2
 
+class CustomHttpResponse():
+    # type length
+    currentMessage_part1 = \
+        b'HTTP/1.1 200 OK\n'\
+        b'Content-Type: %s; charset=UTF-8\n'\
+        b'Content-Encoding: UTF-8\n'\
+        b'Content-Length: %s\n'\
+        b'Server: z_webFrame\n'
+    currentMessage_part2 = \
+        b'\n'\
+        b'%s'
+
+    @classmethod
+    # 通过字典添加header信息, 2个占位符
+    def addContentKW(cls, dic):
+        tmp = cls.currentMessage_part1
+        for i in dic:
+            tmp += i.__str__().encode() + b':' + dic[i].__str__().encode() + b'\n'
+        return tmp + cls.currentMessage_part2
+
+
 def httpResponse_404():
     return 404, responseStatusMessage % (b'404', b'URL NOT FOUNT', b'404 not found')
 
@@ -90,4 +111,5 @@ def get_static_file(fileName):
 
 
 if __name__ == '__main__':
-    print(os.getcwd())
+    res = CustomHttpResponse.addContentKW({1:2})
+    print(res)
