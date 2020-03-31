@@ -1,47 +1,17 @@
 import os
 import json
+
 from backstage import settings
 from backstage.libs.static_file import GetStaticFile
+from backstage.libs.static_data import responseStatusMessage, currentMessage, contentTypeDic
 
 g = None
 
 if settings.preloadingStatic:
     g = GetStaticFile()
 
-
 staticPath = settings.staticPath
 
-htmlMessage = b'''HTTP/1.1 200 OK
-Date: Mon, 23 May 2005 22:38:34 GMT
-Content-Type: text/html; charset=UTF-8
-Content-Encoding: UTF-8
-
-%s
-'''
-
-apiMessage = b'''HTTP/1.1 200 OK
-Date: Mon, 23 May 2005 22:38:34 GMT
-Content-Type: */*; charset=UTF-8
-Content-Encoding: UTF-8
-
-%s
-'''
-
-cssMessage = b'''HTTP/1.1 200 OK
-Date: Mon, 23 May 2005 22:38:34 GMT
-Content-Type: text/css; charset=UTF-8
-Content-Encoding: UTF-8
-
-%s
-'''
-
-editMessage = b'''HTTP/1.1 %s %s
-Date: Mon, 23 May 2005 22:38:34 GMT
-Content-Type: */*; charset=UTF-8
-Content-Encoding: UTF-8
-
-%s
-'''
 
 class httpRequest():
     def __init__(self, data, **kwargs):
@@ -78,41 +48,44 @@ class httpRequest():
         del self.data, self.part1, self.part2
 
 def httpResponse_404():
-    return 404, editMessage % (b'404', b'URL NOT FOUNT', b'404 not found')
+    return 404, responseStatusMessage % (b'404', b'URL NOT FOUNT', b'404 not found')
 
 def httpResponse_500():
-    return 500, editMessage % (b'500', b'SERVER ERROR', b'500 server err')
+    return 500, responseStatusMessage % (b'500', b'SERVER ERROR', b'500 server err')
 
 # 页面
 def httpRender(fileName):
 
     htmlPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame', staticPath, fileName)
     if g:
-        html = g.fileDict[htmlPath]
+        html, htmlSize = g.fileDict[htmlPath]
     else:
         with open(htmlPath, 'rb') as f:
             html = f.read()
-
-    return 200, htmlMessage % html
+            htmlSize = len(html)
+    return 200, currentMessage % (b'text/html', htmlSize.__str__().encode(), html)
 
 # 接口
 def httpResponse(data):
     if not isinstance(data, bytes):
         data = data.encode()
-    return 200, apiMessage % data
+    return 200, currentMessage % (b'text/plain', data)
 
 # 静态文件
 def get_static_file(fileName):
 
     htmlPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame', staticPath) + os.path.normcase(fileName)
     if g:
-        html = g.fileDict[htmlPath]
+        file, fileSize = g.fileDict[htmlPath]
     else:
         with open(htmlPath, 'rb') as f:
-            html = f.read()
-    if fileName.endswith('css'):
-        return 200, cssMessage % html
-    return 200, apiMessage % html
+            file = f.read()
+            fileSize = len(file)
+    suffix = fileName.rsplit('.', 1)[-1]
+
+    if suffix in contentTypeDic:
+        return 200, currentMessage % (contentTypeDic[suffix], fileSize.__str__().encode(), file)
+    return 200, currentMessage % (b'*/*', fileSize.__str__().encode(), file)
 
 
 if __name__ == '__main__':

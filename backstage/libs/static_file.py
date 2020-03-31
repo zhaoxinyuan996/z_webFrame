@@ -20,7 +20,7 @@ class GetStaticFile():
     def write_cache(self, absfile):
         with open(absfile, 'rb') as f:
             res = f.read()
-        self.fileDict[absfile] = res
+        self.fileDict[absfile] = (res, len(res))
 
 
 if __name__ == '__main__':

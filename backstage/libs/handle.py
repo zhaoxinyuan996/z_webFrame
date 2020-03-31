@@ -12,11 +12,11 @@ class CheckData():
     def __set__(self, instance, value):
         if not value:
             self.value = None
+            return
         if 'static' in value:
             self.value = 'static'
         else:
             self.value = 'url'
-        pass
 
     def __delete__(self, instance):
         pass
