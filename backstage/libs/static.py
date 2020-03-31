@@ -69,7 +69,8 @@ def httpRender(fileName):
 def httpResponse(data):
     if not isinstance(data, bytes):
         data = data.encode()
-    return 200, currentMessage % (b'text/plain', data)
+    dataSize = len(data)
+    return 200, currentMessage % (b'text/plain', dataSize.__str__().encode(), data)
 
 # 静态文件
 def get_static_file(fileName):
