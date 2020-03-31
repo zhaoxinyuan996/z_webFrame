@@ -36,16 +36,19 @@ def main():
 
 
 
-def monitor(pid):
-
-    signal.signal(signal.SIGINT, lambda n1, n2 :os.kill(pid, 1) and os._exit(1))
-    while True:
-        sleep(99999)
+# def monitor(pid):
+#
+#     signal.signal(signal.SIGINT, lambda n1, n2 :os.kill(pid, 1) and os._exit(1))
+#     while True:
+#         sleep(99999)
+#
+# if __name__ == '__main__':
+#
+#     pFrame = Process(target=main)
+#     pFrame.start()
+#
+#     pMonitor = Process(target=monitor, args=(pFrame.pid, ))
+#     pMonitor.start()
 
 if __name__ == '__main__':
-
-    pFrame = Process(target=main)
-    pFrame.start()
-
-    pMonitor = Process(target=monitor, args=(pFrame.pid, ))
-    pMonitor.start()
+    main()
