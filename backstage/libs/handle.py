@@ -43,7 +43,7 @@ def handle_url(s, request):
                 try:
                     reponseStatus, funcRes = urls.urlDict[request['httpUrl']](request)
                 except Exception as err:
-                    print('HANDLE ERRPR %s' % traceback.print_exc())
+                    print('HANDLE ERRPR %s' % (traceback.print_exc() if traceback.print_exc() else err))
                     reponseStatus, funcRes = httpResponse_500()
             else:
                 reponseStatus, funcRes = httpResponse_404()
