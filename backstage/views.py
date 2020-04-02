@@ -9,12 +9,8 @@ from time import strftime
 
 
 def get_ip(x,y):#添加日志 记录ip地址
-    # if 'HTTP_X_FORWARDED_FOR' in x.META:
-    #     ip = x.META['HTTP_X_FORWARDED_FOR']
-    # else:
-    #     ip = x.META['REMOTE_ADDR']
     ip = x['addr']
-    print('访问来自',ip)
+    # print('访问来自',ip)
     log=open('/home/admin/logs/%s.txt'%strftime('%Y-%m-%d'),'a')
     log.write(strftime('%H:%M:%S')+' '+ip+' '+y+'\n')
 def redis_insert():
