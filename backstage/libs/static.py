@@ -129,7 +129,9 @@ def get_static_file(fileName):
         with open(htmlPath, 'rb') as f:
             file = f.read()
             fileSize = len(file)
+
     suffix = fileName.rsplit('.', 1)[-1]
+    mStrftime = agreementDateTime.last_file_time(mStrftime)
 
     if suffix in contentTypeDic:
         # return 200, currentMessage % (contentTypeDic[suffix], fileSize.__str__().encode(), file)
