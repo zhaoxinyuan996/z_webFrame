@@ -1,9 +1,13 @@
 import os
 import json
+import pytz
+from datetime import datetime, timezone, timedelta
 
 from backstage import settings
+from backstage.settings import DateTime
 from backstage.libs.static_file import GetStaticFile
-from backstage.libs.static_data import responseStatusMessage, currentMessage, contentTypeDic
+from backstage.libs.static_data import responseStatusMessage, currentMessage, contentTypeDic, wkDayDic
+
 
 g = None
 
@@ -61,11 +65,32 @@ class CustomHttpResponse():
 
     @classmethod
     # 通过字典添加header信息, 2个占位符
-    def addContentKW(cls, dic):
+    def add(cls, dic):
         tmp = cls.currentMessage_part1
         for i in dic:
-            tmp += i.__str__().encode() + b':' + dic[i].__str__().encode() + b'\n'
+            if i:
+                tmp += i.__str__().encode() + b':' + dic[i].__str__().encode() + b'\n'
         return tmp + cls.currentMessage_part2
+
+class agreementDateTime():
+    def __init__(self, format):
+        if format != 'GMT':
+            raise KeyError('datatimeMode设置错误')
+    @ staticmethod
+    def get_date_time():
+        'Sun, 06 Nov 1994 08:49:37 GMT'
+        t = datetime.now()
+        t.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(DateTime.zone))
+        t += timedelta(hours=DateTime.adjustmentHour, minutes=DateTime.adjustmentMinute)
+        t = t.strftime('%a, %d %b %Y %H:%M:%S GMT')
+        return t
+
+    @staticmethod
+    def last_file_time(mtime):
+        t = datetime.fromtimestamp(mtime)
+        t = t.strftime('%a, %d %b %Y %H:%M:%S GMT')
+        return t
+
 
 
 def httpResponse_404():
@@ -79,7 +104,7 @@ def httpRender(fileName):
 
     htmlPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame', staticPath, fileName)
     if g:
-        html, htmlSize = g.fileDict[htmlPath]
+        html, htmlSize, mtime = g.fileDict[htmlPath]
     else:
         with open(htmlPath, 'rb') as f:
             html = f.read()
@@ -98,18 +123,20 @@ def get_static_file(fileName):
 
     htmlPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame', staticPath) + os.path.normcase(fileName)
     if g:
-        file, fileSize = g.fileDict[htmlPath]
+        file, fileSize, mStrftime = g.fileDict[htmlPath]
     else:
+        mStrftime = os.path.getmtime(htmlPath)
         with open(htmlPath, 'rb') as f:
             file = f.read()
             fileSize = len(file)
     suffix = fileName.rsplit('.', 1)[-1]
 
     if suffix in contentTypeDic:
-        return 200, currentMessage % (contentTypeDic[suffix], fileSize.__str__().encode(), file)
+        # return 200, currentMessage % (contentTypeDic[suffix], fileSize.__str__().encode(), file)
+        return 200, CustomHttpResponse.add({'last-modified': mStrftime}) % (contentTypeDic[suffix], fileSize.__str__().encode(), file)
     return 200, currentMessage % (b'*/*', fileSize.__str__().encode(), file)
 
 
 if __name__ == '__main__':
-    res = CustomHttpResponse.addContentKW({1:2})
-    print(res)
+    pass
+

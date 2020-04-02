@@ -15,13 +15,16 @@ class GetStaticFile():
         for i in os.walk(file):
             if i[-1]:
                 for j in i[-1]:
-                    self.write_cache(os.path.join(i[0], j))
+                    p = os.path.join(i[0], j)
+                    self.write_cache(p, os.path.getmtime(p))
 
-    def write_cache(self, absfile):
+
+    def write_cache(self, absfile, modifytime):
         with open(absfile, 'rb') as f:
             res = f.read()
-        self.fileDict[absfile] = (res, len(res))
+        self.fileDict[absfile] = (res, len(res), modifytime)
 
 
 if __name__ == '__main__':
     g = GetStaticFile()
+
