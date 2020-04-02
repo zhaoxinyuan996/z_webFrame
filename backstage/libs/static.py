@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 from backstage import settings
 from backstage.settings import DateTime
 from backstage.libs.static_file import GetStaticFile
-from backstage.libs.static_data import responseStatusMessage, currentMessage, contentTypeDic, wkDayDic
+from backstage.libs.static_data import responseStatusMessage, currentMessage, contentTypeDic
 
 
 g = None
