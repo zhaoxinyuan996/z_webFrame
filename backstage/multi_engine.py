@@ -47,8 +47,9 @@ def engine(sel, port):
             callback = s.data
             callback(s.fileobj, 'seat')
 
-sel = selectors.DefaultSelector()
+
 if __name__ == '__main__':
+    sel = selectors.DefaultSelector()
     engine(sel, 8000)
 
 

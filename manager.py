@@ -1,6 +1,7 @@
-import sys, os, signal
-from time import sleep
-from multiprocessing import Process
+import sys, os
+import selectors
+
+
 
 class EngineError(Exception):pass
 
@@ -32,7 +33,9 @@ def engine():
         pass
 
     elif engine == 'io':
+        sel = selectors.DefaultSelector()
         from backstage.multi_engine import engine
+        engine(sel, port)
 
     else:
         raise EngineError('请选择正确的引擎')
