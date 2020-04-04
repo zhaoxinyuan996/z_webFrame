@@ -32,7 +32,7 @@ def write_func(request, c, seat):
     sel.unregister(c)
 
 # 读为1 写为2
-def main(sel, port):
+def engine(sel, port):
     serverIp = gethostbyname(gethostname())
     print('当前地址为%s:%s' % (serverIp, port))
 
@@ -49,7 +49,7 @@ def main(sel, port):
 
 sel = selectors.DefaultSelector()
 if __name__ == '__main__':
-    main(sel, 8000)
+    engine(sel, 8000)
 
 
 
