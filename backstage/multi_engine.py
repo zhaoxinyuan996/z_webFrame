@@ -24,12 +24,13 @@ def read_func(sel, addr, c, seat):
 
 # 写
 def write_func(sel, request, c, seat):
-    handle_url(c, request)
-    try:
-        c.close()
-    except ConnectionResetError:
-        pass
     sel.unregister(c)
+    handle_url(c, request)
+    # try:
+    #     c.close()
+    # except ConnectionResetError:
+    #     pass
+    # sel.unregister(c)
 
 # 读为1 写为2
 def engine(sel, port):
