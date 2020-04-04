@@ -2,7 +2,6 @@ import selectors
 from functools import partial
 from socket import socket, SOL_SOCKET, SO_REUSEADDR, gethostbyname, gethostname
 
-
 # 接入
 from backstage.libs.handle import handle_url
 from backstage.libs.static import httpRequest
@@ -23,9 +22,19 @@ def read_func(sel, addr, c, seat):
         sel.unregister(c)
 
 # 写
+lis = []
 def write_func(sel, request, c, seat):
-    sel.unregister(c)
-    handle_url(c, request)
+    # 非阻塞引起的bug
+    if c not in lis:
+        print(c, '不在')
+        handle_url(c, request)
+        lis.append(c)
+    else:
+        print(c, '在')
+        sel.unregister(c)
+        lis.remove(c)
+    # c.close()
+    #
     # try:
     #     c.close()
     # except ConnectionResetError:
