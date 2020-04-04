@@ -8,22 +8,22 @@ from backstage.libs.handle import handle_url
 from backstage.libs.static import httpRequest
 
 
-def accept(s, seat):
+def accept(sel, s, seat):
     c, addr = s.accept()
     c.setblocking(False)
 
-    sel.register(c, selectors.EVENT_READ, partial(read_func, addr))
+    sel.register(c, selectors.EVENT_READ, partial(read_func, sel, addr))
 
 # 读
-def read_func(addr, c, seat):
+def read_func(sel, addr, c, seat):
     try:
         request = httpRequest(c.recv(1024), addr=addr[0])
-        sel.modify(c, selectors.EVENT_WRITE, partial(write_func, request))
+        sel.modify(c, selectors.EVENT_WRITE, partial(write_func, sel, request))
     except ConnectionResetError:
         sel.unregister(c)
 
 # 写
-def write_func(request, c, seat):
+def write_func(sel, request, c, seat):
     handle_url(c, request)
     try:
         c.close()
@@ -41,7 +41,7 @@ def engine(sel, port):
     sock.setblocking(False)
     sock.bind(('0.0.0.0', port))
     sock.listen()
-    sel.register(sock, selectors.EVENT_READ, accept)
+    sel.register(sock, selectors.EVENT_READ, partial(accept, sel))
     while True:
         for s, event in sel.select():
             callback = s.data
