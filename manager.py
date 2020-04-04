@@ -4,7 +4,7 @@ from multiprocessing import Process
 
 class EngineError(Exception):pass
 
-def main():
+def engine():
     sys.argv.remove(os.path.basename(globals()['__file__']))
 
     engine = 'async'
@@ -54,4 +54,4 @@ def main():
 #     pMonitor.start()
 
 if __name__ == '__main__':
-    main()
+    engine()
