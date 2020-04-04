@@ -31,6 +31,9 @@ def main():
     elif engine == 'async':
         pass
 
+    elif engine == 'io':
+        from backstage.multi_engine import engine
+
     else:
         raise EngineError('请选择正确的引擎')
 
