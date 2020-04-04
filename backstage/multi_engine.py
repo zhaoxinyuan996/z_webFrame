@@ -15,31 +15,30 @@ def accept(sel, s, seat):
 
 # 读
 def read_func(sel, addr, c, seat):
+    if not addr:
+        sel.unregister(c)
+        return
     try:
         request = httpRequest(c.recv(1024), addr=addr[0])
         sel.modify(c, selectors.EVENT_WRITE, partial(write_func, sel, request))
-    except ConnectionResetError:
+    except (ConnectionResetError, ConnectionAbortedError):
         sel.unregister(c)
 
 # 写
-lis = []
+# lis = []
 def write_func(sel, request, c, seat):
+    handle_url(c, request)
+    sel.modify(c, selectors.EVENT_READ, partial(read_func, sel, None))
     # 非阻塞引起的bug
-    if c not in lis:
-        print(c, '不在')
-        handle_url(c, request)
-        lis.append(c)
-    else:
-        print(c, '在')
-        sel.unregister(c)
-        lis.remove(c)
-    # c.close()
-    #
-    # try:
-    #     c.close()
-    # except ConnectionResetError:
-    #     pass
-    # sel.unregister(c)
+    # if c not in lis:
+    #     print(c, '不在')
+    #     handle_url(c, request)
+    #     lis.append(c)
+    # else:
+    #     print(c, '在')
+    #     sel.unregister(c)
+    #     lis.remove(c)
+
 
 # 读为1 写为2
 def engine(sel, port):
