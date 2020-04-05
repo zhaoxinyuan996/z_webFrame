@@ -15,7 +15,7 @@ class MySocket(socket):
         try:
             fd, addr = self._accept()
             c = MySocket(fileno=fd)
-            c.setsockopt(SOL_SOCKET, SO_SNDBUF, 4096)
+            # c.setsockopt(SOL_SOCKET, SO_SNDBUF, 4096000)
             return c, addr
         except BlockingIOError:
             return None
@@ -110,7 +110,6 @@ def func_accept(check, sock, addr):
 
 def func_read(check, sock, addr):
     # 解析
-    # print(sock)
     res = sock.recv(1024)
     if res.startswith(b'E'):
         res = b'G' + res
@@ -122,9 +121,12 @@ def func_read(check, sock, addr):
 def func_write(check, sock, request):
     data = handle_url(sock, request, 'mysocket')
     if data:
-        sock.setblocking(True)
-        sock.sendall(data)
+        sock.send(data)
+        sock.close()
         check.unregister(sock)
+    else:
+        print(data)
+
 
 
 # 读为1 写为2
@@ -143,7 +145,7 @@ def engine(check, port):
                 func_accept(check, s[0], s[-1][0])
                 continue
             s.func()
-        sleep(0.1)
+        sleep(0.0000001)
 
 # 注册时就应该把函数加进去
 # 下一步直接运行不带参的函数
