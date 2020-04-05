@@ -148,9 +148,9 @@ def engine(check, port):
 # 注册时就应该把函数加进去
 # 下一步直接运行不带参的函数
 
+MODE = 'mysocket'
+check = CheckEvent()
 if __name__ == '__main__':
-    MODE = 'mysocket'
-    check = CheckEvent()
     engine(check, 8000)
 
 

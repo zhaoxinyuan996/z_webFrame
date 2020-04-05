@@ -1,11 +1,10 @@
 import sys, os
-import selectors
 
 
 
 class EngineError(Exception):pass
 
-def engine():
+def main_engine():
     sys.argv.remove(os.path.basename(globals()['__file__']))
 
     engine = 'async'
@@ -33,9 +32,8 @@ def engine():
         pass
 
     elif engine == 'io':
-        sel = selectors.DefaultSelector()
-        from backstage.multi_engine import engine
-        engine(sel, port)
+        from backstage.multi_engine import engine, check
+        engine(check, port)
 
     else:
         raise EngineError('请选择正确的引擎')
@@ -57,4 +55,4 @@ def engine():
 #     pMonitor.start()
 
 if __name__ == '__main__':
-    engine()
+    main_engine()
