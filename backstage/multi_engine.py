@@ -28,14 +28,15 @@ class MySocket(socket):
         try:
             self.send(b'')
             return True
-        except (ConnectionAbortedError, BlockingIOError, ConnectionResetError):
+        # except (BrokenPipeError, ConnectionAbortedError, BlockingIOError, ConnectionResetError):
+        except Exception:
             return False
 
     def my_recv(self):
         try:
             self.recv(1)
             return True
-        except (ConnectionAbortedError, BlockingIOError, ConnectionResetError):
+        except Exception:
             return False
 
 class CheckEvent():
