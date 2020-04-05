@@ -127,7 +127,7 @@ def func_write(check, sock, request):
     data = handle_url(sock, request, 'mysocket')
     if data:
         sock.setblocking(True)
-        sock.send(data * 1000)
+        sock.send(data)
         check.modify(sock, 'my_send', partial(wait_close, check, sock))
     else:
         sock.close()
