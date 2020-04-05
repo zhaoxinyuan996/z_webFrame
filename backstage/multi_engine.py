@@ -128,7 +128,7 @@ def wait_close(check, sock):
 
 
 def engine(check, port):
-    if 'linux' in platform.system().upper():
+    if 'linux' in platform.system().lower():
         os.system('sysctl -w net.core.wmem_max=%s' % AsyncSettings.wmem_max)
     serverIp = gethostbyname(gethostname())
     sleepTime = AsyncSettings.sleepTime / 1000000
