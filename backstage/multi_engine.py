@@ -122,12 +122,13 @@ def func_write(check, sock, request):
     data = handle_url(sock, request, 'mysocket')
     if data:
         sock.send(data)
-        sock.close()
-        check.unregister(sock)
+        check.modify(sock, 'my_send', partial(wait_close, check, sock))
     else:
-        print(data)
+        sock.close()
 
-
+def wait_close(check, sock):
+    sock.close()
+    check.unregister(sock)
 
 # 读为1 写为2
 def engine(check, port):
