@@ -25,7 +25,7 @@ class Attribute():
     check = CheckData()
 
 # 分发路由
-def handle_url(s, request):
+def handle_url(s, request, MODE=None):
     reponseStatus = None
     checkValue = Attribute()
     checkValue.check = request.get('httpUrl')
@@ -52,6 +52,8 @@ def handle_url(s, request):
             reponseStatus, funcRes = get_static_file(request['httpUrl'])
 
     outputUserInfo(request, reponseStatus)
+    if MODE == 'mysocket':
+        return funcRes
     s.send(funcRes)
 
 
