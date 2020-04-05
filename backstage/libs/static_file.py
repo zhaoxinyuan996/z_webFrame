@@ -1,6 +1,6 @@
-from backstage.settings import preloadingStatic, staticPath
-
 import os
+
+from backstage.settings import preloadingStatic, staticPath
 
 if preloadingStatic:
     # dist 目录

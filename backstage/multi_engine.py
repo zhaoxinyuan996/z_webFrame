@@ -1,9 +1,9 @@
 import os
 import platform
 
-from socket import socket, SOL_SOCKET, SO_REUSEADDR, gethostbyname, gethostname, AF_INET, SOCK_STREAM, SO_SNDBUF
 from time import sleep
 from functools import partial
+from socket import socket, SOL_SOCKET, SO_REUSEADDR, gethostbyname, gethostname, AF_INET, SOCK_STREAM, SO_SNDBUF
 
 from backstage.libs.handle import handle_url
 from backstage.libs.static import httpRequest

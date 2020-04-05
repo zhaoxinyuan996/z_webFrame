@@ -1,7 +1,7 @@
 import os
 import json
 import pytz
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 
 from backstage import settings
 from backstage.settings import DateTime
