@@ -41,20 +41,17 @@ class MySocket(socket):
 
 class CheckEvent():
     def __init__(self):
-        self.dic = {1: {}, 2: {}}
+        self.dic = {0: {}, 1: {}}
         self.modifyTmp = {}
         self.unregisterTmp = set()
-        self.flag = 1
+        self.flag = 0
         self.allowMode = ('accept', 'my_recv', 'my_send')
 
     def register(self, obj, event, func):
         if event not in self.allowMode:
             raise ValueError('mode is not permissible')
         obj.func = func
-        if self.flag == 1:
-            self.dic[2][obj] = event
-        else:
-            self.dic[1][obj] = event
+        self.dic[self.flag ^ 1][obj] = event
 
     def unregister(self, obj):
         if obj not in self.dic[self.flag]:
@@ -83,18 +80,13 @@ class CheckEvent():
         else:
             # 修改
             for k, w in self.modifyTmp.items():
-                if self.flag == 1:
-                    self.dic[2][k] = w
-                else:
-                    self.dic[1][k] = w
+                self.dic[self.flag ^ 1][k] = w
 
             # 复制
             for k ,w in self.dic[self.flag].items():
                 if k not in self.modifyTmp and k not in self.unregisterTmp:
-                    if self.flag == 1:
-                        self.dic[2][k] = w
-                    else:
-                        self.dic[1][k] = w
+                    self.dic[self.flag ^ 1][k] = w
+
 
             # 复制完毕，清空所有临时池和待复制字典
             self.modifyTmp.clear()
@@ -102,8 +94,7 @@ class CheckEvent():
             self.dic[self.flag].clear()
 
             # 换字典
-            if self.flag == 1: self.flag = 2
-            else: self.flag = 1
+            self.flag = self.flag ^ 1
 
 # 3种情况 注册 修改 注销
 # 注册 注册到另一个dic
@@ -126,7 +117,6 @@ def func_read(check, sock, addr):
 def func_write(check, sock, request):
     data = handle_url(sock, request, 'mysocket')
     if data:
-        sock.setblocking(True)
         sock.send(data)
         check.modify(sock, 'my_send', partial(wait_close, check, sock))
     else:
@@ -136,15 +126,13 @@ def wait_close(check, sock):
     sock.close()
     check.unregister(sock)
 
-# 读为1 写为2
+
 def engine(check, port):
     if 'linux' in platform.system().upper():
         os.system('sysctl -w net.core.wmem_max=%s' % AsyncSettings.wmem_max)
     serverIp = gethostbyname(gethostname())
-    if AsyncSettings.sleepTime:
-        sleepTime = AsyncSettings.sleepTime / 1000000
-    else:
-        sleepTime = False
+    sleepTime = AsyncSettings.sleepTime / 1000000
+
     print('当前地址为%s:%s' % (serverIp, port))
     print('当前TCP缓冲区最大值为%s' % AsyncSettings.wmem_max)
     print('当前事件循环强制等待时长为%ss' % sleepTime)
@@ -160,8 +148,7 @@ def engine(check, port):
                 func_accept(check, s[0], s[-1][0])
                 continue
             s.func()
-        if sleepTime:
-            sleep(sleepTime)
+        sleep(sleepTime)
 
 
 MODE = 'mysocket'
