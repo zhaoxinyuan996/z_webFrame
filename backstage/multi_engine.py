@@ -1,9 +1,13 @@
+import os
+import platform
+
 from socket import socket, SOL_SOCKET, SO_REUSEADDR, gethostbyname, gethostname, AF_INET, SOCK_STREAM, SO_SNDBUF
 from time import sleep
 from functools import partial
 
 from backstage.libs.handle import handle_url
 from backstage.libs.static import httpRequest
+from backstage.settings import AsyncSettings
 
 
 class MySocket(socket):
@@ -15,7 +19,7 @@ class MySocket(socket):
         try:
             fd, addr = self._accept()
             c = MySocket(fileno=fd)
-            # c.setsockopt(SOL_SOCKET, SO_SNDBUF, 4096000)
+            c.setsockopt(SOL_SOCKET, SO_SNDBUF, AsyncSettings.wmem_max)
             return c, addr
         except BlockingIOError:
             return None
@@ -24,14 +28,14 @@ class MySocket(socket):
         try:
             self.send(b'')
             return True
-        except (ConnectionAbortedError, BlockingIOError):
+        except (ConnectionAbortedError, BlockingIOError, ConnectionResetError):
             return False
 
     def my_recv(self):
         try:
             self.recv(1)
             return True
-        except (ConnectionAbortedError, BlockingIOError):
+        except (ConnectionAbortedError, BlockingIOError, ConnectionResetError):
             return False
 
 class CheckEvent():
@@ -121,7 +125,8 @@ def func_read(check, sock, addr):
 def func_write(check, sock, request):
     data = handle_url(sock, request, 'mysocket')
     if data:
-        sock.send(data)
+        sock.setblocking(True)
+        sock.send(data * 1000)
         check.modify(sock, 'my_send', partial(wait_close, check, sock))
     else:
         sock.close()
@@ -132,8 +137,16 @@ def wait_close(check, sock):
 
 # 读为1 写为2
 def engine(check, port):
+    if 'linux' in platform.system().upper():
+        os.system('sysctl -w net.core.wmem_max=%s' % AsyncSettings.wmem_max)
     serverIp = gethostbyname(gethostname())
+    if AsyncSettings.sleepTime:
+        sleepTime = AsyncSettings.sleepTime / 1000000
+    else:
+        sleepTime = False
     print('当前地址为%s:%s' % (serverIp, port))
+    print('当前TCP缓冲区最大值为%s' % AsyncSettings.wmem_max)
+    print('当前事件循环强制等待时长为%ss' % sleepTime)
 
     sock = MySocket()
     sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, True)
@@ -146,15 +159,13 @@ def engine(check, port):
                 func_accept(check, s[0], s[-1][0])
                 continue
             s.func()
-        sleep(0.0000001)
+        if sleepTime:
+            sleep(sleepTime)
 
-# 注册时就应该把函数加进去
-# 下一步直接运行不带参的函数
 
 MODE = 'mysocket'
 check = CheckEvent()
 if __name__ == '__main__':
     engine(check, 8000)
-
 
 

@@ -13,6 +13,13 @@ class DateTime():
     adjustmentHour = 0
     adjustmentMinute = 0
 
+# 异步io的设置
+class AsyncSettings():
+    # 最大缓冲区设置，防止多个非阻塞的套接字把缓冲区写满 SB浏览器还不取，导致接收不完全的致命bug
+    wmem_max = 4196304
+    # 防止事件循环跑满cpu设置的等待时间
+    sleepTime = 10 # 单位为μs(微秒) ，不在乎cpu可设为False，(1000μs == 1ms ; 1000ms = 1s)
+
 # 静态文件根目录
 staticPath = 'dist'
 
@@ -22,10 +29,3 @@ debuggerLevel = 'DEBUG'
 # 静态文件预加载
 preloadingStatic = True
 
-# 时间格式
-datatimeMode = 'GMT'
-zone = 'Asia/Shanghai'
-
-# 时间调整
-adjustmentHour = 0
-adjustmentMinute = 0
