@@ -33,6 +33,14 @@ class httpRequest():
     def __getitem__(self, item):
         return self.__dict__[item]
 
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+
+    def __iter__(self):
+        for k in self.__dict__.keys():
+            if not k.startswith('__'):
+                yield k
+
     def get(self, key, default = None):
         if key in self.__dict__:
             return self.__dict__[key]
