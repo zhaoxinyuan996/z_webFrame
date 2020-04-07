@@ -18,6 +18,11 @@
 异步io导图
 ![导图](https://github.com/zhaoxinyuan996/z_webFrame/blob/master/MindMapping/socket%2B%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF%2B%E5%9B%9E%E8%B0%83%20%E6%A8%A1%E5%BC%8F%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8Bmin.jpg)
 
+
+2020年4月5日
+添加前台是否显示报错详情的开关
+添加禁止访问的url
+
 2020年4月5日
 添加 socket+事件循环+回调模式引擎
 发现epoll的bug是源于超出TCP最大缓存区引起的
