@@ -4,7 +4,7 @@ import pytz
 from datetime import datetime, timedelta
 
 from backstage import settings
-from backstage.settings import DateTime
+from backstage.settings import DateTime, debug
 from backstage.libs.static_file import GetStaticFile
 from backstage.libs.static_data import responseStatusMessage, currentMessage, contentTypeDic
 
@@ -100,11 +100,15 @@ class agreementDateTime():
         return t
 
 
+def httpResponse_403():
+    return 403, responseStatusMessage % (b'403', b'URL Forbidden', b'access denied')
 
 def httpResponse_404():
     return 404, responseStatusMessage % (b'404', b'URL NOT FOUNT', b'404 not found')
 
-def httpResponse_500():
+def httpResponse_500(traceback=None):
+    if traceback and debug:
+        return 500, responseStatusMessage % (b'500', b'SERVER ERROR', str(traceback).encode())
     return 500, responseStatusMessage % (b'500', b'SERVER ERROR', b'500 server err')
 
 # 页面

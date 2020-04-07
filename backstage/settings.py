@@ -32,3 +32,8 @@ debuggerLevel = 'DEBUG'
 # 静态文件预加载
 preloadingStatic = True
 
+# 禁止访问的url e.g. *.*.*.* 127.*.0.1
+deniedRequestIp = []
+
+# 前台是否显示报错原因
+debug = True

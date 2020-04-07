@@ -111,7 +111,7 @@ def func_read(check, sock, addr):
         res = b'G' + res
     elif res.startswith(b'O'):
         res = b'P' + res
-    res = httpRequest(res, addr = addr[0])
+    res = httpRequest(res, addr = addr)
     check.modify(sock, 'my_send', partial(func_write, check, sock, res))
 
 def func_write(check, sock, request):

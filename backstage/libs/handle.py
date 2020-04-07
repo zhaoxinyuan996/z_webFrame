@@ -1,9 +1,12 @@
+import re
 import time
 import traceback
 
 from backstage import urls
 from backstage.libs.static import *
+from backstage.settings import deniedRequestIp
 
+deniedRequestIp = [i.replace('*', '\d{1,3}').replace('.','\.') for i in deniedRequestIp]
 
 class CheckData():
     def __get__(self, instance, owner):
@@ -36,20 +39,25 @@ def handle_url(s, request, MODE=None):
         return
 
     if request.get('httpUrl'):
+        # 禁止访问的url
+        for i in deniedRequestIp:
+            if re.findall(i, request.addr):
+                reponseStatus, funcRes = httpResponse_403(); break
 
-            # 走路由
-        if checkValue.check == 'url':
-            if urls.urlDict.get(request['httpUrl']):
-                try:
-                    reponseStatus, funcRes = urls.urlDict[request['httpUrl']](request)
-                except Exception as err:
-                    print('HANDLE ERRPR %s' % (traceback.print_exc() if traceback.print_exc() else err))
-                    reponseStatus, funcRes = httpResponse_500()
-            else:
-                reponseStatus, funcRes = httpResponse_404()
-        # 读静态文件
-        elif checkValue.check == 'static':
-            reponseStatus, funcRes = get_static_file(request['httpUrl'])
+        else:
+                # 走路由
+            if checkValue.check == 'url':
+                if urls.urlDict.get(request['httpUrl']):
+                    try:
+                        reponseStatus, funcRes = urls.urlDict[request['httpUrl']](request)
+                    except Exception as err:
+                        print('HANDLE ERRPR %s' % (traceback.print_exc() if traceback.print_exc() else err))
+                        reponseStatus, funcRes = httpResponse_500(traceback.print_exc())
+                else:
+                    reponseStatus, funcRes = httpResponse_404()
+            # 读静态文件
+            elif checkValue.check == 'static':
+                reponseStatus, funcRes = get_static_file(request['httpUrl'])
 
     outputUserInfo(request, reponseStatus)
     if MODE == 'mysocket':
