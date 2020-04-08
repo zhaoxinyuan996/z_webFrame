@@ -57,7 +57,11 @@ def handle_url(s, request, MODE=None):
                     reponseStatus, funcRes = httpResponse_404()
             # 读静态文件
             elif checkValue.check == 'static':
-                reponseStatus, funcRes = get_static_file(request['httpUrl'], request)
+                try:
+                    reponseStatus, funcRes = get_static_file(request['httpUrl'], request)
+                except Exception as err:
+                    print('STATICFILE ERROR %s' % (traceback.print_exc() if traceback.print_exc() else err))
+                    reponseStatus, funcRes = httpResponse_404()
 
     outputUserInfo(request, reponseStatus)
     if MODE == 'mysocket':
