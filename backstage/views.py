@@ -23,7 +23,7 @@ def redis_insert():
 ###########################视图函数###############################
 def home(request):
     # get_ip(request, 'home')
-    return httpRender('index.html')
+    return httpRender('index.html', request)
 # def home(request):
 #     get_ip(request,'home')
 #     redis_insert()

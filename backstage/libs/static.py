@@ -1,6 +1,8 @@
 import os
 import json
 import pytz
+
+from copy import deepcopy
 from datetime import datetime, timedelta
 
 from backstage import settings
@@ -8,20 +10,19 @@ from backstage.settings import DateTime, debug
 from backstage.libs.static_file import GetStaticFile
 from backstage.libs.static_data import responseStatusMessage, currentMessage, contentTypeDic
 
-
-g = None
-
-if settings.preloadingStatic:
-    g = GetStaticFile()
+g = GetStaticFile()
 
 staticPath = settings.staticPath
 
 
 class httpRequest():
     def __init__(self, data, **kwargs):
+        for k in kwargs:
+            if k in self.__dict__:
+                raise KeyError('key %s has been existed' % k)
+
         self.data = data
         self.__dict__.update(kwargs.items())
-        # print(data)
         try:
             self.parse_http_request()
         except:
@@ -31,7 +32,10 @@ class httpRequest():
         return None
 
     def __getitem__(self, item):
-        return self.__dict__[item]
+        if item in self.__dict__:
+            return self.__dict__[item]
+        else:
+            raise KeyError('httpRequest object has no Attribute')
 
     def __setitem__(self, key, value):
         self.__dict__[key] = value
@@ -59,26 +63,29 @@ class httpRequest():
 
         del self.data, self.part1, self.part2
 
-class CustomHttpResponse():
-    # type length
-    currentMessage_part1 = \
-        b'HTTP/1.1 200 OK\n'\
-        b'Content-Type: %s; charset=UTF-8\n'\
-        b'Content-Encoding: UTF-8\n'\
-        b'Content-Length: %s\n'\
-        b'Server: z_webFrame\n'
-    currentMessage_part2 = \
-        b'\n'\
-        b'%s'
 
-    @classmethod
-    # 通过字典添加header信息, 2个占位符
-    def add(cls, dic):
-        tmp = cls.currentMessage_part1
+class BaseResponse():
+    start = b'HTTP/1.1 200 OK\n'
+    end = b'\n%s'
+    dic = {
+        'Content-Type': '',
+        'Content-Encoding': 'UTF-8',
+        'Content-Length': '',
+        'Server': 'z_webFrame'
+           }
+
+    @ classmethod
+    def add(cls, contentType, contentLength, kwargs, contentEncoding='UTF-8'):
+        dic = deepcopy(cls.dic)
+        dic['Content-Type'] = contentType
+        dic['Content-Length'] = contentLength
+        dic['Content-Encoding'] = contentEncoding
+        dic.update(kwargs)
+
+        parsed = b''
         for i in dic:
-            if i:
-                tmp += i.__str__().encode() + b':' + dic[i].__str__().encode() + b'\n'
-        return tmp + cls.currentMessage_part2
+            parsed += i.__str__().encode() + b':' + dic[i].__str__().encode() + b'\n'
+        return cls.start + parsed + cls.end
 
 class agreementDateTime():
     def __init__(self, format):
@@ -101,7 +108,7 @@ class agreementDateTime():
 
 
 def httpResponse_403():
-    return 403, responseStatusMessage % (b'403', b'URL Forbidden', b'access denied')
+    return 403, responseStatusMessage % (b'403', b'URL FORBIDDEN', b'403 access denied')
 
 def httpResponse_404():
     return 404, responseStatusMessage % (b'404', b'URL NOT FOUNT', b'404 not found')
@@ -112,16 +119,14 @@ def httpResponse_500(traceback=None):
     return 500, responseStatusMessage % (b'500', b'SERVER ERROR', b'500 server err')
 
 # 页面
-def httpRender(fileName):
+def httpRender(fileName, request):
 
     htmlPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame', staticPath, fileName)
-    if g:
-        html, htmlSize, mtime = g.fileDict[htmlPath]
-    else:
-        with open(htmlPath, 'rb') as f:
-            html = f.read()
-            htmlSize = len(html)
-    return 200, currentMessage % (b'text/html', htmlSize.__str__().encode(), html)
+    html, htmlSize, mtime, gzipFile = g.fileDict[htmlPath]
+
+    if 'gzip' in request['Accept-Encoding']:
+        return 200, BaseResponse.add('text/html', len(gzipFile).__str__(), {}, contentEncoding='gzip') % gzipFile
+    return 200, BaseResponse.add('text/html', htmlSize.__str__(), {}) % html
 
 # 接口
 def httpResponse(data):
@@ -131,23 +136,19 @@ def httpResponse(data):
     return 200, currentMessage % (b'text/plain', dataSize.__str__().encode(), data)
 
 # 静态文件
-def get_static_file(fileName):
-
+def get_static_file(fileName, request):
     htmlPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame', staticPath) + os.path.normcase(fileName)
-    if g:
-        file, fileSize, mStrftime = g.fileDict[htmlPath]
-    else:
-        mStrftime = os.path.getmtime(htmlPath)
-        with open(htmlPath, 'rb') as f:
-            file = f.read()
-            fileSize = len(file)
-
+    file, fileSize, mStrftime, gzipFile = g.fileDict[htmlPath]
+    # 后缀
     suffix = fileName.rsplit('.', 1)[-1]
     mStrftime = agreementDateTime.last_file_time(mStrftime)
-
     if suffix in contentTypeDic:
-        # return 200, currentMessage % (contentTypeDic[suffix], fileSize.__str__().encode(), file)
-        return 200, CustomHttpResponse.add({'last-modified': mStrftime}) % (contentTypeDic[suffix], fileSize.__str__().encode(), file)
+
+        if 'gzip' in request['Accept-Encoding']:
+            return 200, BaseResponse.add(contentTypeDic[suffix], len(gzipFile).__str__(), {'last-modified': mStrftime}, contentEncoding='gzip') % gzipFile
+
+        return 200, BaseResponse.add(contentTypeDic[suffix], fileSize.__str__(), {'last-modified': mStrftime}) % file
+
     return 200, currentMessage % (b'*/*', fileSize.__str__().encode(), file)
 
 

@@ -1,10 +1,11 @@
 import os
+import gzip
 
-from backstage.settings import preloadingStatic, staticPath
+from io import BytesIO
 
-if preloadingStatic:
-    # dist 目录
-    rootPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame',staticPath)
+from backstage.settings import staticPath
+
+rootPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame',staticPath)
 
 class GetStaticFile():
     def __init__(self):
@@ -22,7 +23,9 @@ class GetStaticFile():
     def write_cache(self, absfile, modifytime):
         with open(absfile, 'rb') as f:
             res = f.read()
-        self.fileDict[absfile] = (res, len(res), modifytime)
+        f_gzip = BytesIO()
+        gzip.open(f_gzip, 'wb').write(res)
+        self.fileDict[absfile] = (res, len(res), modifytime, f_gzip.getvalue())
 
 
 if __name__ == '__main__':

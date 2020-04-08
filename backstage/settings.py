@@ -29,9 +29,6 @@ staticPath = 'dist'
 # 日志级别
 debuggerLevel = 'DEBUG'
 
-# 静态文件预加载
-preloadingStatic = True
-
 # 禁止访问的url e.g. *.*.*.* 127.*.0.1
 deniedRequestIp = []
 
