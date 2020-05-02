@@ -64,6 +64,7 @@ def handle_url(s, request, MODE=None):
                     reponseStatus, funcRes = httpResponse_404()
 
     outputUserInfo(request, reponseStatus)
+    del request
     if MODE == 'mysocket':
         return funcRes
     s.send(funcRes)

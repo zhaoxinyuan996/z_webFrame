@@ -90,6 +90,8 @@ class CheckEvent():
 
             # 复制完毕，清空所有临时池和待复制字典
             self.modifyTmp.clear()
+            for obj in self.unregisterTmp:
+                del obj
             self.unregisterTmp.clear()
             self.dic[self.flag].clear()
 
@@ -121,6 +123,7 @@ def func_write(check, sock, request):
         check.modify(sock, 'my_send', partial(wait_close, check, sock))
     else:
         sock.close()
+        check.unregister(sock)
 
 def wait_close(check, sock):
     sock.close()
