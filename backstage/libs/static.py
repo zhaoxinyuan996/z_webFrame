@@ -35,7 +35,7 @@ class httpRequest():
         if item in self.__dict__:
             return self.__dict__[item]
         else:
-            raise KeyError('httpRequest object has no Attribute')
+            raise KeyError('httpRequest object has no Attribute “%s”' % item)
 
     def __setitem__(self, key, value):
         self.__dict__[key] = value
