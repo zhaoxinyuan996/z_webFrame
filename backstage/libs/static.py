@@ -66,7 +66,7 @@ class httpRequest():
                 except:
                     if ':' in i:
                         self.__dict__[i.split(':')[0]] = i.split(':')[1]
-
+        del self.data, self.part1, self.part2
 
 class BaseResponse():
     start = b'HTTP/1.1 200 OK\n'
