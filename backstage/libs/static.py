@@ -62,10 +62,11 @@ class httpRequest():
         self.httpUrl = '/' + self.httpUrl.rsplit('/', 1)[-1]
         for i in self.part2.split('\n'):
             if i:
-                print(i)
-                if ':' in i:
-                    self.__dict__[i.split(':')[0]] = i.split(':')[1]
-        del self.data, self.part1, self.part2
+                try:
+                    self.__dict__.update(json.loads(i))
+                except:
+                    if ':' in i:
+                        self.__dict__[i.split(':')[0]] = i.split(':')[1]
 
 
 class BaseResponse():
