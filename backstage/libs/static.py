@@ -59,7 +59,6 @@ class httpRequest():
 
         self.part1, self.part2 = self.data.split('\n', 1)
         self.httpMethod, self.httpUrl, self.httpVersion = self.part1.split()
-        self.httpUrl = '/' + self.httpUrl.rsplit('/', 1)[-1]
         for i in self.part2.split('\n'):
             if i:
                 try:
