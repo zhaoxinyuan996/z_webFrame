@@ -25,8 +25,8 @@ class httpRequest():
         self.__dict__.update(kwargs.items())
         try:
             self.parse_http_request()
-        except:
-            print('parse error')
+        except Exception as e:
+            print('parse error, %s' % e)
 
     def __getattr__(self, item):
         return None
@@ -52,15 +52,19 @@ class httpRequest():
             return default
 
     def parse_http_request(self):
-        self.part1, self.part2 = self.data.decode().split('\r\n', 1)
+        self.data = self.data.decode()
+
+        if '\r\n' in self.data:
+            self.data = self.data.replace('\r\n', '\n')
+
+        self.part1, self.part2 = self.data.split('\n', 1)
         self.httpMethod, self.httpUrl, self.httpVersion = self.part1.split()
-        for i in self.part2.split('\r\n'):
-            try:
-                self.__dict__.update(json.loads(i))
-            except:
+        self.httpUrl = '/' + self.httpUrl.rsplit('/', 1)[-1]
+        for i in self.part2.split('\n'):
+            if i:
+                print(i)
                 if ':' in i:
                     self.__dict__[i.split(':')[0]] = i.split(':')[1]
-
         del self.data, self.part1, self.part2
 
 
