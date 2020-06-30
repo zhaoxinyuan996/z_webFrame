@@ -125,7 +125,7 @@ def httpResponse_500(traceback=None):
 # 页面
 def httpRender(fileName, request):
 
-    htmlPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame', staticPath, fileName)
+    htmlPath = os.path.join(os.path.dirname(__file__), *[os.pardir] * 2, staticPath, fileName)
     html, htmlSize, mtime, gzipFile = g.fileDict[htmlPath]
 
     if 'gzip' in request['Accept-Encoding']:
@@ -141,7 +141,7 @@ def httpResponse(data):
 
 # 静态文件
 def get_static_file(fileName, request):
-    htmlPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame', staticPath) + os.path.normcase(fileName)
+    htmlPath = os.path.join(os.path.dirname(__file__), *[os.pardir] * 2, staticPath, 'fileName')
     file, fileSize, mStrftime, gzipFile = g.fileDict[htmlPath]
     # 后缀
     suffix = fileName.rsplit('.', 1)[-1]

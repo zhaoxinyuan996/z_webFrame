@@ -5,13 +5,12 @@ from io import BytesIO
 
 from backstage.settings import staticPath
 
-rootPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame',staticPath)
 
 class GetStaticFile():
     def __init__(self):
-        self.rootPath = os.path.join(os.getcwd().split('z_webFrame')[0], 'z_webFrame',staticPath)
+        self.rootPath = os.path.join(os.path.dirname(__file__), *[os.pardir] * 2, staticPath)
         self.fileDict = {}
-        self.deal_file(rootPath)
+        self.deal_file(self.rootPath)
     def deal_file(self, file):
         for i in os.walk(file):
             if i[-1]:
